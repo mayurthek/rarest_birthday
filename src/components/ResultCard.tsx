@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import { RotateCcw } from 'lucide-react';
 import type { BirthdayResult } from '../types/birthday';
 import { BirthdayCake } from './BirthdayCake';
-import { downloadShareCard } from '../utils/cardGenerator';
+import { downloadShareCard, getShareCardFile } from '../utils/cardGenerator';
 import { trackEvent } from '../utils/analytics';
 import {
   getZodiacInfo,
@@ -104,22 +104,44 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
 
   const handleNativeShare = async () => {
     trackEvent('result_shared', { method: 'native', date: result.birthday_mm_dd });
-    if (navigator.share) {
-      try {
+    
+    try {
+      // Synchronously generate the image file from canvas so iOS user gesture isn't lost
+      const imageFile = getShareCardFile(result);
+
+      // If Web Share API with files is supported (mobile Safari iOS, Chrome Android)
+      if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+        await navigator.share({
+          files: [imageFile],
+          title: 'How Rare Is Your Birthday? — India',
+          text: `My birthday (${result.formattedDate}) is rarer than ${result.rarerThanPercent}% of birthdays in India! Check yours: ${shareUrl}`,
+        });
+        onShowToast('Card ready! Tap Instagram Story, WhatsApp or Save.');
+        return;
+      }
+
+      // Fallback: Web Share without files
+      if (navigator.share) {
         await navigator.share({
           title: 'How Rare Is Your Birthday? — India',
           text: shareCopy,
           url: shareUrl,
         });
-        onShowToast('Shared successfully!');
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          handleCopyLink();
-        }
+        onShowToast('Link shared successfully!');
+        return;
       }
-    } else {
-      handleCopyLink();
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Share error:', err);
+        await handleDownloadCard();
+        onShowToast('Card saved! You can now post it to your Instagram Story 📸');
+      }
+      return;
     }
+
+    // Fallback for desktop browsers without navigator.share
+    await handleDownloadCard();
+    onShowToast('Card saved! Open Instagram on your phone to add it to your story 📸');
   };
 
   const handleCopyLink = () => {
@@ -311,6 +333,10 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
           >
             <span>Post to X</span>
           </button>
+
+          <div className="bt-share-hint">
+            <span>✨ Tap <strong>Send card</strong> on phone to share directly to your Instagram Story</span>
+          </div>
         </div>
       </div>
 

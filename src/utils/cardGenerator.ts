@@ -2,10 +2,10 @@ import type { BirthdayResult } from '../types/birthday';
 import { getZodiacInfo, getSeasonInfo, getBirthdayParadoxInfo } from './birthdayFun';
 
 /**
- * Generates a high-DPI 1:1 square card (1080x1080 px) on HTML5 Canvas
+ * Generates an HTML5 Canvas with the 1:1 square card (1080x1080 px)
  * in clean Apple HIG typography and BirthdayTraffic styling.
  */
-export async function generateShareCard(result: BirthdayResult): Promise<string> {
+export function generateShareCardCanvas(result: BirthdayResult): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = 1080;
   canvas.height = 1080;
@@ -135,11 +135,45 @@ export async function generateShareCard(result: BirthdayResult): Promise<string>
   ctx.letterSpacing = '0.04em';
   ctx.fillText('howrareisyourbirthday.fun', 540, 890);
 
+  return canvas;
+}
+
+/**
+ * Synchronously converts a Base64 dataURL to a File object
+ */
+export function dataURLtoFile(dataurl: string, filename: string): File {
+  const arr = dataurl.split(',');
+  const mimeMatch = arr[0].match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}
+
+/**
+ * Synchronously generates a File object for the card, ready for Web Share API
+ */
+export function getShareCardFile(result: BirthdayResult): File {
+  const canvas = generateShareCardCanvas(result);
+  const dataUrl = canvas.toDataURL('image/png');
+  return dataURLtoFile(dataUrl, `howrareisyourbirthday-${result.birthday_mm_dd}.png`);
+}
+
+/**
+ * Generates a high-DPI 1:1 square card (1080x1080 px) dataURL
+ */
+export async function generateShareCard(result: BirthdayResult): Promise<string> {
+  const canvas = generateShareCardCanvas(result);
   return canvas.toDataURL('image/png');
 }
 
 export async function downloadShareCard(result: BirthdayResult): Promise<void> {
-  const dataUrl = await generateShareCard(result);
+  const canvas = generateShareCardCanvas(result);
+  const dataUrl = canvas.toDataURL('image/png');
   const link = document.createElement('a');
   link.download = `rarest-birthday-${result.birthday_mm_dd}.png`;
   link.href = dataUrl;
