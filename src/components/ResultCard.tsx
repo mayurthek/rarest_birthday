@@ -4,6 +4,7 @@ import { RotateCcw } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import type { BirthdayResult } from '../types/birthday';
 import { BirthdayCake } from './BirthdayCake';
+import { ScratchCard } from './ScratchCard';
 import { dataURLtoFile, generateShareCard } from '../utils/cardGenerator';
 import { trackEvent } from '../utils/analytics';
 import {
@@ -31,9 +32,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
   
   // Interactive 50-50 Crowd slider state (default 23 people, classic paradox point)
   const [crowdSlider, setCrowdSlider] = useState<number>(23);
-
-  // Secret stat foil scratch state
-  const [isFoilRevealed, setIsFoilRevealed] = useState<boolean>(false);
 
   // Derived fun facts & benchmarks
   const zodiac = getZodiacInfo(result.month, result.day);
@@ -551,30 +549,11 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
 
           <h3 className="bt-section-heading">Births on this day</h3>
 
-          {!isFoilRevealed ? (
-            <div
-              className="bt-holographic-foil"
-              onClick={() => setIsFoilRevealed(true)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsFoilRevealed(true)}
-              aria-label="Click to reveal statistic"
-            >
-              <div className="bt-foil-shimmer" />
-              <div className="bt-foil-content">
-                <span className="bt-foil-text">Scratch to reveal</span>
-                <span className="bt-foil-subtext">India daily birth rate</span>
-              </div>
-            </div>
-          ) : (
-            <div className="bt-revealed-stat-box">
-              <div className="bt-revealed-number">~{birthsPerMinute}</div>
-              <div className="bt-revealed-label">births per minute in India</div>
-              <div className="bt-revealed-sub">
-                (~{birthsPerHour.toLocaleString('en-IN')} per hour)
-              </div>
-            </div>
-          )}
+          <ScratchCard
+            birthsPerMinute={birthsPerMinute}
+            birthsPerHour={birthsPerHour}
+            averageAnnualBirths={result.averageAnnualBirths}
+          />
         </section>
       </div>
 

@@ -1260,56 +1260,89 @@ body {
   margin-top: 2px;
 }
 
-/* Iridescent Metallic Foil Gradient */
-.bt-holographic-foil {
-  min-height: 105px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #D4E2F4 0%, #E8D3E5 50%, #F4E8D6 100%);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+/* Interactive Scratch Card Styles */
+.bt-scratch-wrapper {
   margin-top: 10px;
-}
-
-.bt-holographic-foil:hover {
-  transform: scale(1.015);
-}
-
-.bt-foil-shimmer {
-  position: absolute;
-  inset: -100%;
-  background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.6) 50%, transparent 60%);
-  animation: foilShimmer 3.2s infinite linear;
-}
-
-.bt-foil-content {
-  position: relative;
-  z-index: 2;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.bt-scratch-box {
+  position: relative;
+  min-height: 112px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(36, 39, 40, 0.06);
+}
+
+.bt-scratch-box .bt-revealed-stat-box {
+  margin-top: 0;
+  min-height: 112px;
+  border-radius: 16px;
+  user-select: none;
+}
+
+.bt-scratch-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  z-index: 3;
+}
+
+.bt-scratch-canvas:active {
+  cursor: grabbing;
+}
+
+.bt-scratch-actions {
+  display: flex;
   align-items: center;
-  text-align: center;
-  padding: 12px;
+  justify-content: space-between;
+  padding: 0 2px;
 }
 
-.bt-foil-text {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--bt-charcoal);
+.bt-scratch-hint-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.bt-foil-subtext {
+.bt-scratch-progress-tag,
+.bt-scratch-unlocked-tag {
   font-size: 11.5px;
-  font-weight: 600;
-  color: #4A4742;
-  opacity: 0.85;
-  margin-top: 2px;
+  font-weight: 700;
+  color: #7D4C5D;
+}
+
+.bt-scratch-unlocked-tag {
+  color: #2E7D32;
+}
+
+.bt-quick-reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #F8F5EE;
+  border: 1px solid rgba(36, 39, 40, 0.1);
+  font-family: var(--font-main);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--bt-charcoal);
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+.bt-quick-reveal-btn:hover {
+  background: #EFE9DC;
+  transform: translateY(-1px);
 }
 
 .bt-revealed-stat-box {
