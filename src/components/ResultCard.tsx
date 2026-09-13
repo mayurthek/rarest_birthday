@@ -375,10 +375,6 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
           >
             <span>Post to X</span>
           </button>
-
-          <div className="bt-share-hint">
-            <span>✨ Tap <strong>Send card</strong> on phone to share directly to your Instagram Story</span>
-          </div>
         </div>
       </div>
 
