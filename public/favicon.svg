@@ -1,5 +1,105 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="46" fill="#FFFDF9" stroke="#FF7A00" stroke-width="5"/>
-  <path d="M50 18 L53 38 L73 38 L57 50 L63 70 L50 58 L37 70 L43 50 L27 38 L47 38 Z" fill="#FF7A00"/>
-  <circle cx="50" cy="46" r="6" fill="#FFD54F"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient: Bright Vibrant Cheerful Yellow -->
+    <linearGradient id="yellowBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDD00" />
+      <stop offset="100%" stop-color="#FFB700" />
+    </linearGradient>
+
+    <!-- Candle Flame Gradient -->
+    <radialGradient id="flameGrad" cx="50%" cy="75%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="35%" stop-color="#FFF580" />
+      <stop offset="75%" stop-color="#FF7700" />
+      <stop offset="100%" stop-color="#E53835" />
+    </radialGradient>
+
+    <!-- Candle Stripe Clipping Mask -->
+    <clipPath id="candleClip">
+      <rect x="58" y="32" width="12" height="26" rx="3" />
+    </clipPath>
+  </defs>
+
+  <!-- Bright Yellow Squircle Background -->
+  <rect width="128" height="128" rx="30" fill="url(#yellowBg)" />
+
+  <!-- Soft Shadow Under Pedestal Plate -->
+  <ellipse cx="64" cy="107" rx="36" ry="6" fill="#D99B00" opacity="0.45" />
+
+  <!-- Pedestal Cake Stand -->
+  <path d="M46 105 L82 105 Q82 101 74 98 L74 95 L54 95 L54 98 Q46 101 46 105 Z" fill="#FFFBF5" />
+  <ellipse cx="64" cy="95" rx="44" ry="7" fill="#F2ECE1" />
+  <ellipse cx="64" cy="94" rx="43" ry="6.2" fill="#FFFFFF" />
+
+  <!-- Cake Base Body (Soft cream sponge / pastel vanilla) -->
+  <rect x="29" y="64" width="70" height="27" rx="6" fill="#FFF8EB" />
+  <!-- Sponge contact gradient/shadow -->
+  <path d="M29 83 Q64 92 99 83 L99 86 Q64 95 29 86 Z" fill="#EBD9BA" />
+
+  <!-- Cake Frosting Layer Top & Drips -->
+  <rect x="28" y="60" width="72" height="12" rx="4" fill="#FFFFFF" />
+  <!-- Scalloped Whipped Cream Drips -->
+  <path d="M28 69 
+           Q34 77 40 69 
+           Q46 79 52 69 
+           Q58 81 64 69 
+           Q70 81 76 69 
+           Q82 78 88 69 
+           Q94 77 100 69 
+           L100 60 L28 60 Z" fill="#FFFFFF" />
+
+  <!-- Base Whipped Cream Pearl Ring -->
+  <circle cx="34" cy="90" r="3.2" fill="#FFFFFF" />
+  <circle cx="42" cy="91" r="3.2" fill="#FFFFFF" />
+  <circle cx="50" cy="91.5" r="3.2" fill="#FFFFFF" />
+  <circle cx="58" cy="92" r="3.2" fill="#FFFFFF" />
+  <circle cx="64" cy="92" r="3.2" fill="#FFFFFF" />
+  <circle cx="70" cy="92" r="3.2" fill="#FFFFFF" />
+  <circle cx="78" cy="91.5" r="3.2" fill="#FFFFFF" />
+  <circle cx="86" cy="91" r="3.2" fill="#FFFFFF" />
+  <circle cx="94" cy="90" r="3.2" fill="#FFFFFF" />
+
+  <!-- Top Cream Rosettes & Berries -->
+  <circle cx="36" cy="60" r="5.5" fill="#FFFDF8" />
+  <circle cx="50" cy="59" r="5.5" fill="#FFFDF8" />
+  <circle cx="64" cy="58" r="6" fill="#FFFDF8" />
+  <circle cx="78" cy="59" r="5.5" fill="#FFFDF8" />
+  <circle cx="92" cy="60" r="5.5" fill="#FFFDF8" />
+
+  <!-- Raspberry Pearls on Rosettes -->
+  <circle cx="36" cy="58" r="3.2" fill="#E63946" />
+  <circle cx="50" cy="57" r="3.2" fill="#E63946" />
+  <circle cx="78" cy="57" r="3.2" fill="#E63946" />
+  <circle cx="92" cy="58" r="3.2" fill="#E63946" />
+
+  <!-- Funfetti Sprinkles on Cake Body -->
+  <rect x="38" y="74" width="5.5" height="2.4" rx="1.2" transform="rotate(-15 38 74)" fill="#FF6584" />
+  <rect x="51" y="78" width="5.5" height="2.4" rx="1.2" transform="rotate(25 51 78)" fill="#3A86FF" />
+  <rect x="68" y="76" width="5.5" height="2.4" rx="1.2" transform="rotate(-30 68 76)" fill="#FF9E00" />
+  <rect x="81" y="75" width="5.5" height="2.4" rx="1.2" transform="rotate(18 81 75)" fill="#8338EC" />
+  <rect x="61" y="84" width="5" height="2.2" rx="1.1" transform="rotate(-10 61 84)" fill="#FF6584" />
+  <rect x="44" y="83" width="5" height="2.2" rx="1.1" transform="rotate(20 44 83)" fill="#06D6A0" />
+  <rect x="75" y="83" width="5" height="2.2" rx="1.1" transform="rotate(-22 75 83)" fill="#3A86FF" />
+
+  <!-- Birthday Candle -->
+  <g clip-path="url(#candleClip)">
+    <rect x="58" y="32" width="12" height="26" rx="3" fill="#FFFFFF" />
+    <path d="M54 36 L74 43 L74 47 L54 40 Z" fill="#E63946" />
+    <path d="M54 45 L74 52 L74 56 L54 49 Z" fill="#E63946" />
+  </g>
+
+  <!-- Candle Wick -->
+  <line x1="64" y1="32" x2="64" y2="27" stroke="#2B2D42" stroke-width="2.2" stroke-linecap="round" />
+
+  <!-- Luminous Flame Aura Glow -->
+  <circle cx="64" cy="20" r="15" fill="#FFB703" opacity="0.38" />
+
+  <!-- Outer Flame -->
+  <path d="M64 10 Q72 20 68 25 Q65 29 64 29 Q63 29 60 25 Q56 20 64 10 Z" fill="url(#flameGrad)" />
+  <!-- Inner Flame Luminous Core -->
+  <path d="M64 17 Q67 22 66 26 Q64.5 28 64 28 Q63.5 28 62 26 Q61 22 64 17 Z" fill="#FFFFFF" opacity="0.95" />
+
+  <!-- Whimsical Magic Sparkles -->
+  <path d="M104 25 Q104 31 110 31 Q104 31 104 37 Q104 31 98 31 Q104 31 104 25 Z" fill="#FFFFFF" opacity="0.95" />
+  <path d="M22 36 Q22 41 27 41 Q22 41 22 46 Q22 41 17 41 Q22 41 22 36 Z" fill="#FFFFFF" opacity="0.85" />
 </svg>
