@@ -32,4 +32,5 @@ export interface BirthdayResult {
   };
   isLeapDay: boolean;
   spectrumPosition: number; // 0 (rarest) to 100 (most common)
+  dailyProbability: number; // exact modeled birth probability in India
 }

@@ -14,7 +14,7 @@ export function generateShareCardCanvas(result: BirthdayResult): HTMLCanvasEleme
 
   const zodiac = getZodiacInfo(result.month, result.day);
   const season = getSeasonInfo(result.month);
-  const paradox = getBirthdayParadoxInfo(result.isLeapDay);
+  const paradox = getBirthdayParadoxInfo(result.dailyProbability, result.isLeapDay);
 
   // Background: Warm #FEF2DB Cream Canvas
   ctx.fillStyle = '#FEF2DB';

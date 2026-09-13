@@ -38,8 +38,8 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
   // Derived fun facts & benchmarks
   const zodiac = getZodiacInfo(result.month, result.day);
   const season = getSeasonInfo(result.month);
-  const paradox = getBirthdayParadoxInfo(result.isLeapDay);
-  const crowdStats = calculateCrowdProbabilities(crowdSlider, result.isLeapDay);
+  const paradox = getBirthdayParadoxInfo(result.dailyProbability, result.isLeapDay);
+  const crowdStats = calculateCrowdProbabilities(crowdSlider, result.dailyProbability, result.isLeapDay);
   const benchmarks = getBenchmarkComparisons(result.averageAnnualBirths, result.formattedDate);
 
   // Secret birth rate stats
@@ -399,7 +399,13 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
         </div>
 
         <p className="bt-section-desc">
-          In a room this size, there is at least a 50–50 chance someone shares your exact birthday.
+          {result.isLeapDay
+            ? `Because 29 February occurs only once every 4 years, you'd need a gathering of ~${paradox.roomSizeForMatch} people to have a 50–50 chance of meeting a fellow leapling!`
+            : result.rawRank <= 30
+            ? `Because ${result.formattedDate} is one of India's most common birthdays, you need only ~${paradox.roomSizeForMatch} people (fewer than the calendar average of 253) for a 50% chance of a twin.`
+            : result.rawRank >= 335
+            ? `Because ${result.formattedDate} is a rarer birthdate in India, you need a larger crowd (~${paradox.roomSizeForMatch} people vs the average 253) to find someone sharing your day.`
+            : `In a gathering of ~${paradox.roomSizeForMatch} people, there is a 50–50 chance at least one person shares your exact birthday (${result.formattedDate}).`}
         </p>
 
         <div className="bt-divider-line" />
@@ -412,11 +418,30 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
             </span>
           </div>
 
+          {/* Quick preset jump pills */}
+          <div className="bt-crowd-preset-chips" role="group" aria-label="Crowd size quick presets">
+            {[
+              { label: '23 (Classic)', value: 23 },
+              { label: '100 (Party)', value: 100 },
+              { label: `~${paradox.roomSizeForMatch} (50% Twin)`, value: paradox.roomSizeForMatch },
+              { label: result.isLeapDay ? '1,000 (Hall)' : '500 (Hall)', value: result.isLeapDay ? 1000 : 500 },
+            ].map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                className={`bt-preset-chip ${crowdSlider === preset.value ? 'is-active' : ''}`}
+                onClick={() => setCrowdSlider(preset.value)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
           <input
             id="crowd-range"
             type="range"
             min="10"
-            max="500"
+            max={result.isLeapDay ? 1200 : 500}
             step="1"
             value={crowdSlider}
             onChange={(e) => setCrowdSlider(parseInt(e.target.value, 10))}
@@ -428,7 +453,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
           <div className="bt-prob-clean-list">
             <div className="bt-prob-clean-row">
               <div className="bt-prob-meta">
-                <span className="bt-prob-name">Someone matches your birthday</span>
+                <span className="bt-prob-name">Someone matches your birthday ({result.formattedDate})</span>
                 <span className="bt-prob-val">{crowdStats.userMatchPercent}%</span>
               </div>
               <div className="bt-progress-track">

@@ -1010,6 +1010,39 @@ body {
   font-weight: 800;
 }
 
+.bt-crowd-preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.bt-preset-chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(125, 76, 93, 0.18);
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 700;
+  color: #7D4C5D;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+.bt-preset-chip:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(125, 76, 93, 0.35);
+  transform: translateY(-1px);
+}
+
+.bt-preset-chip.is-active {
+  background: var(--bt-charcoal);
+  color: #FFFFFF;
+  border-color: var(--bt-charcoal);
+  box-shadow: 0 2px 6px rgba(36, 39, 40, 0.18);
+}
+
 .bt-crowd-slider {
   width: 100%;
   height: 8px;

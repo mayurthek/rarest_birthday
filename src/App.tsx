@@ -133,6 +133,7 @@ export function App() {
           ) : (
             result && (
               <ResultCard
+                key={result.birthday_mm_dd}
                 result={result}
                 onReset={handleReset}
                 onShowToast={showToast}

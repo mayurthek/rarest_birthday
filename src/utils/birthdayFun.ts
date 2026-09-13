@@ -115,10 +115,31 @@ export function getSeasonInfo(month: number): SeasonInfo {
   }
 }
 
-export function getBirthdayParadoxInfo(isLeapDay: boolean): BirthdayParadoxInfo {
-  const roomSize = isLeapDay ? 1013 : 253;
+export function getBirthdayParadoxInfo(
+  dailyProbabilityOrIsLeap: number | boolean,
+  isLeapDay?: boolean
+): BirthdayParadoxInfo {
+  let p = 0;
+  let isLeap = false;
+
+  if (typeof dailyProbabilityOrIsLeap === 'number') {
+    p = dailyProbabilityOrIsLeap;
+    isLeap = !!isLeapDay;
+  } else {
+    isLeap = !!dailyProbabilityOrIsLeap;
+    p = isLeap ? 1 / 1461 : 1 / 365.25;
+  }
+
+  if (!p || p <= 0) {
+    p = isLeap ? 1 / 1461 : 1 / 365.25;
+  }
+
+  // Exact room size N needed for P(at least 1 twin) >= 50%
+  // 1 - (1 - p)^N >= 0.5  =>  N >= ln(0.5) / ln(1 - p)
+  const roomSize = Math.ceil(Math.log(0.5) / Math.log(1 - p));
   const classic = 23;
-  const probIn100 = isLeapDay ? '6.6%' : '24.0%';
+  const probIn100Val = (1 - Math.pow(1 - p, 100)) * 100;
+  const probIn100 = `${probIn100Val.toFixed(1)}%`;
 
   return {
     roomSizeForMatch: roomSize,
@@ -127,15 +148,32 @@ export function getBirthdayParadoxInfo(isLeapDay: boolean): BirthdayParadoxInfo 
   };
 }
 
-// Calculate dynamic probabilities for interactive crowd slider (10 to 500 people)
-export function calculateCrowdProbabilities(crowdSize: number, isLeapDay: boolean): {
+// Calculate dynamic probabilities for interactive crowd slider (10 to 1200 people)
+export function calculateCrowdProbabilities(
+  crowdSize: number,
+  dailyProbabilityOrIsLeap: number | boolean,
+  isLeapDay?: boolean
+): {
   userMatchPercent: number;
   anyMatchPercent: number;
 } {
-  const daysInYear = isLeapDay ? 1461 : 365;
-  
+  let p = 0;
+  let isLeap = false;
+
+  if (typeof dailyProbabilityOrIsLeap === 'number') {
+    p = dailyProbabilityOrIsLeap;
+    isLeap = !!isLeapDay;
+  } else {
+    isLeap = !!dailyProbabilityOrIsLeap;
+    p = isLeap ? 1 / 1461 : 1 / 365.25;
+  }
+
+  if (!p || p <= 0) {
+    p = isLeap ? 1 / 1461 : 1 / 365.25;
+  }
+
   // Probability that at least one person in crowd matches the USER's specific birthday
-  const userMatchProb = 1 - Math.pow((daysInYear - 1) / daysInYear, crowdSize);
+  const userMatchProb = 1 - Math.pow(1 - p, crowdSize);
   const userMatchPercent = Math.min(100, Math.max(0, Math.round(userMatchProb * 1000) / 10));
 
   // Probability that ANY two people in the crowd share a birthday (Classic Paradox)
@@ -143,11 +181,11 @@ export function calculateCrowdProbabilities(crowdSize: number, isLeapDay: boolea
   if (crowdSize >= 365) {
     anyMatchProb = 1.0;
   } else {
-    let p = 1.0;
+    let q = 1.0;
     for (let i = 0; i < crowdSize; i++) {
-      p *= (365 - i) / 365;
+      q *= (365 - i) / 365;
     }
-    anyMatchProb = 1 - p;
+    anyMatchProb = 1 - q;
   }
   const anyMatchPercent = Math.min(100, Math.max(0, Math.round(anyMatchProb * 1000) / 10));
 

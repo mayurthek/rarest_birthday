@@ -2,11 +2,15 @@ import rawData from '../data/birthdaySummary.json';
 import type { RawBirthdayRecord, BirthdayResult } from '../types/birthday';
 
 const recordsMap = new Map<string, RawBirthdayRecord>();
+let totalExpectedBirths = 0;
 
-// Populate lookup map
+// Populate lookup map and compute aggregate births
 (rawData as RawBirthdayRecord[]).forEach((rec) => {
   recordsMap.set(rec.birthday_mm_dd, rec);
+  totalExpectedBirths += rec.expected_births_in_window;
 });
+
+export const TOTAL_EXPECTED_BIRTHS = totalExpectedBirths;
 
 export const MONTH_NAMES = [
   'January',
@@ -133,6 +137,9 @@ export function getBirthdayResult(month: number, day: number): BirthdayResult | 
       `One of the most bustling birthday dates in the country! Your birthday lands in India's peak annual birth window.`;
   }
 
+  // Exact empirical probability of a random person having this birthday
+  const dailyProbability = record.expected_births_in_window / (TOTAL_EXPECTED_BIRTHS || 1);
+
   return {
     birthday_mm_dd: key,
     day,
@@ -150,6 +157,7 @@ export function getBirthdayResult(month: number, day: number): BirthdayResult | 
     tier,
     isLeapDay,
     spectrumPosition,
+    dailyProbability,
   };
 }
 
