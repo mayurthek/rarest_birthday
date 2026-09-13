@@ -232,7 +232,7 @@ export const BirthdayCake: React.FC<BirthdayCakeProps> = ({
     camera.lookAt(0, 1.02, 0);
 
     // 2. High-Fidelity Renderer with ACES Filmic Tone Mapping
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;

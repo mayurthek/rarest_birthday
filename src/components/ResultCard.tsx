@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { RotateCcw } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import type { BirthdayResult } from '../types/birthday';
 import { BirthdayCake } from './BirthdayCake';
-import { downloadShareCard, getShareCardFile } from '../utils/cardGenerator';
+import { dataURLtoFile, generateShareCard } from '../utils/cardGenerator';
 import { trackEvent } from '../utils/analytics';
 import {
   getZodiacInfo,
@@ -22,6 +23,7 @@ interface ResultCardProps {
 }
 
 export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowToast }) => {
+  const cardRef = useRef<HTMLElement>(null);
   const [animatedPercent, setAnimatedPercent] = useState(0);
   const [isCopied, setIsCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -46,9 +48,10 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
 
   // Initial count-up animation
   useEffect(() => {
+    // Fire celebratory confetti cannons on mount
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!prefersReducedMotion) {
-      const colors = ['#FF5252', '#FF4081', '#7C4DFF', '#536DFE', '#00B0FF', '#00E676', '#FFD700', '#FF9100'];
+      const colors = ['#E63946', '#FFB703', '#48CAE4', '#9D4EDD', '#F4A261', '#FFF'];
       confetti({
         particleCount: 65,
         angle: 60,
@@ -102,12 +105,40 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
   const shareUrl = `${window.location.origin}${window.location.pathname}?date=${result.birthday_mm_dd}`;
   const shareCopy = `My birthday (${result.formattedDate}) is rarer than ${result.rarerThanPercent}% of birthdays in India! Check your birthday rarity here: ${shareUrl}`;
 
+  // Captures the EXACT card currently displayed on screen (Classic or Stats)
+  const getCapturedCardDataUrl = async (): Promise<string> => {
+    if (cardRef.current) {
+      try {
+        const dataUrl = await toPng(cardRef.current, {
+          pixelRatio: 2.5,
+          cacheBust: true,
+          style: {
+            transform: 'none',
+          },
+          filter: (node: HTMLElement) => {
+            // Exclude interactive hover/click hints from card export
+            if (node.classList && node.classList.contains('cake-hover-hint')) {
+              return false;
+            }
+            return true;
+          },
+        });
+        return dataUrl;
+      } catch (err) {
+        console.warn('DOM card capture fallback:', err);
+      }
+    }
+    return generateShareCard(result);
+  };
+
   const handleNativeShare = async () => {
-    trackEvent('result_shared', { method: 'native', date: result.birthday_mm_dd });
+    trackEvent('result_shared', { method: 'native', date: result.birthday_mm_dd, mode: cardMode });
+    setIsDownloading(true);
     
     try {
-      // Synchronously generate the image file from canvas so iOS user gesture isn't lost
-      const imageFile = getShareCardFile(result);
+      // Capture the exact card shown on screen
+      const dataUrl = await getCapturedCardDataUrl();
+      const imageFile = dataURLtoFile(dataUrl, `howrareisyourbirthday-${cardMode}-${result.birthday_mm_dd}.png`);
 
       // If Web Share API with files is supported (mobile Safari iOS, Chrome Android)
       if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
@@ -117,6 +148,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
           text: `My birthday (${result.formattedDate}) is rarer than ${result.rarerThanPercent}% of birthdays in India! Check yours: ${shareUrl}`,
         });
         onShowToast('Card ready! Tap Instagram Story, WhatsApp or Save.');
+        setIsDownloading(false);
         return;
       }
 
@@ -128,6 +160,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
           url: shareUrl,
         });
         onShowToast('Link shared successfully!');
+        setIsDownloading(false);
         return;
       }
     } catch (err) {
@@ -136,10 +169,12 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
         await handleDownloadCard();
         onShowToast('Card saved! You can now post it to your Instagram Story 📸');
       }
+      setIsDownloading(false);
       return;
     }
 
     // Fallback for desktop browsers without navigator.share
+    setIsDownloading(false);
     await handleDownloadCard();
     onShowToast('Card saved! Open Instagram on your phone to add it to your story 📸');
   };
@@ -155,9 +190,16 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
   const handleDownloadCard = async () => {
     setIsDownloading(true);
     try {
-      await downloadShareCard(result);
-      trackEvent('share_card_downloaded', { date: result.birthday_mm_dd });
-      onShowToast('Collectible Pastel Card downloaded!');
+      const dataUrl = await getCapturedCardDataUrl();
+      const link = document.createElement('a');
+      link.download = `howrareisyourbirthday-${cardMode}-${result.birthday_mm_dd}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      trackEvent('share_card_downloaded', { date: result.birthday_mm_dd, mode: cardMode });
+      onShowToast(`${cardMode === 'classic' ? 'Classic' : 'Stats'} Card downloaded!`);
     } catch (err) {
       console.error(err);
       onShowToast('Failed to generate image. Please try again.');
@@ -187,7 +229,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
           ============================================================ */}
       {cardMode === 'classic' ? (
         /* CLASSIC MODE: Consistent Horizontal Split Banner on ALL devices */
-        <section className="bt-card bt-classic-horizontal-card">
+        <section ref={cardRef} className="bt-card bt-classic-horizontal-card">
           <div className="bt-classic-content">
             <div className="bt-classic-date-label">{result.formattedDate}</div>
             
@@ -219,7 +261,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ result, onReset, onShowT
         </section>
       ) : (
         /* STATS MODE: Modern Portrait Collectible Card */
-        <section className="bt-card bt-stats-portrait-card">
+        <section ref={cardRef} className="bt-card bt-stats-portrait-card">
           <div className="bt-stats-header">
             <div className="bt-stats-date">{result.formattedDate}</div>
             <div className="bt-stats-tag">{rankCategory}</div>
