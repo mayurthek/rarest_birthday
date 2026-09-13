@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Sparkles, RotateCcw } from 'lucide-react';
 
 interface ScratchCardProps {
   birthsPerMinute: string;
@@ -17,7 +16,6 @@ export const ScratchCard: React.FC<ScratchCardProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isScratching, setIsScratching] = useState<boolean>(false);
   const [isRevealed, setIsRevealed] = useState<boolean>(false);
-  const [scratchPercent, setScratchPercent] = useState<number>(0);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
 
   // Initialize Canvas Foil
@@ -67,7 +65,7 @@ export const ScratchCard: React.FC<ScratchCardProps> = ({
 
     // Subtle Sparkle dots
     ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 18; i++) {
       const sx = (i * 47) % width;
       const sy = (i * 31) % height;
       ctx.beginPath();
@@ -76,34 +74,29 @@ export const ScratchCard: React.FC<ScratchCardProps> = ({
     }
 
     // Centered Scratch Badge
-    const badgeW = Math.min(width - 24, 210);
-    const badgeH = 50;
+    const badgeW = Math.min(width - 24, 180);
+    const badgeH = 38;
     const bx = (width - badgeW) / 2;
     const by = (height - badgeH) / 2;
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.78)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.beginPath();
-    ctx.roundRect(bx, by, badgeW, badgeH, 14);
+    ctx.roundRect(bx, by, badgeW, badgeH, 12);
     ctx.fill();
 
     ctx.strokeStyle = 'rgba(125, 76, 93, 0.2)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Text instructions
+    // Text: "Scratch to reveal"
     ctx.fillStyle = '#242728';
     ctx.font = '800 13.5px "Inter UI", "Inter", -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('✨ Scratch to reveal', width / 2, by + 18);
-
-    ctx.fillStyle = '#6E5C68';
-    ctx.font = '600 11px "Inter UI", "Inter", -apple-system, sans-serif';
-    ctx.fillText('Rub with finger or mouse', width / 2, by + 34);
+    ctx.fillText('Scratch to reveal', width / 2, height / 2);
 
     ctx.restore();
     setIsRevealed(false);
-    setScratchPercent(0);
   }, []);
 
   // Set up foil on mount and resize
@@ -119,6 +112,28 @@ export const ScratchCard: React.FC<ScratchCardProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [initFoil, isRevealed]);
+
+  // Full reveal handler
+  const revealEntirely = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.style.transition = 'opacity 0.35s ease-out';
+      canvas.style.opacity = '0';
+      setTimeout(() => {
+        setIsRevealed(true);
+      }, 350);
+    } else {
+      setIsRevealed(true);
+    }
+
+    // Celebrate with mini confetti
+    confetti({
+      particleCount: 28,
+      spread: 55,
+      origin: { y: 0.75 },
+      colors: ['#FFB703', '#E63946', '#48CAE4', '#9D4EDD'],
+    });
+  }, []);
 
   // Calculate percentage of transparent pixels
   const checkScratchPercentage = useCallback(() => {
@@ -148,35 +163,12 @@ export const ScratchCard: React.FC<ScratchCardProps> = ({
     }
 
     const pct = total > 0 ? Math.round((transparent / total) * 100) : 0;
-    setScratchPercent(pct);
 
-    // If 40% or more has been scratched, automatically reveal the rest with celebration!
+    // If 40% or more has been scratched, automatically reveal the rest with celebration
     if (pct >= 40) {
       revealEntirely();
     }
-  }, [isRevealed]);
-
-  // Full reveal handler
-  const revealEntirely = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.style.transition = 'opacity 0.35s ease-out';
-      canvas.style.opacity = '0';
-      setTimeout(() => {
-        setIsRevealed(true);
-      }, 350);
-    } else {
-      setIsRevealed(true);
-    }
-
-    // Celebrate with mini confetti
-    confetti({
-      particleCount: 28,
-      spread: 55,
-      origin: { y: 0.75 },
-      colors: ['#FFB703', '#E63946', '#48CAE4', '#9D4EDD'],
-    });
-  }, []);
+  }, [isRevealed, revealEntirely]);
 
   // Scratch Drawing
   const scratch = (clientX: number, clientY: number) => {
@@ -267,39 +259,8 @@ export const ScratchCard: React.FC<ScratchCardProps> = ({
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
-            aria-label="Interactive scratch foil. Scratch with mouse or finger to reveal birth rate."
+            aria-label="Interactive scratch foil. Scratch to reveal birth rate."
           />
-        )}
-      </div>
-
-      {/* Helper / Action Row */}
-      <div className="bt-scratch-actions">
-        {!isRevealed ? (
-          <div className="bt-scratch-hint-row">
-            <span className="bt-scratch-progress-tag">
-              {scratchPercent > 0 ? `${scratchPercent}% scratched` : '🪙 Ready to scratch'}
-            </span>
-            <button
-              type="button"
-              className="bt-quick-reveal-btn"
-              onClick={revealEntirely}
-            >
-              <Sparkles size={12} />
-              <span>Reveal all</span>
-            </button>
-          </div>
-        ) : (
-          <div className="bt-scratch-hint-row">
-            <span className="bt-scratch-unlocked-tag">✨ Revealed!</span>
-            <button
-              type="button"
-              className="bt-quick-reveal-btn"
-              onClick={initFoil}
-            >
-              <RotateCcw size={12} />
-              <span>Scratch again</span>
-            </button>
-          </div>
         )}
       </div>
     </div>
