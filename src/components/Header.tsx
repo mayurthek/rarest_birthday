@@ -13,7 +13,7 @@ export const Header: React.FC<HeaderProps> = ({ onHome }) => {
         onClick={onHome}
         aria-label="Return to main page"
       >
-        <span className="brand-name">birthday traffic</span>
+        <span className="brand-name">howrareisyourbirthday</span>
       </button>
     </header>
   );
